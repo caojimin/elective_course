@@ -1,0 +1,88 @@
+﻿<!DOCTYPE html>
+<html>
+<!--Head-->
+<head>
+    <meta charset="utf-8" />
+    <title>登录</title>
+
+    <meta name="description" content="login page" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <link rel="shortcut icon" href="public/img/favicon.png" type="image/x-icon">
+
+    <!--Basic Styles-->
+    <link href="public/css/bootstrap.css" rel="stylesheet">
+    <!--Beyond styles-->
+    <link id="beyond-link" href="public/css/beyond.css" rel="stylesheet">
+    <script src="public/js/jquery-2.0.3.min.js"></script>
+</head>
+
+<body>
+   <div class="login-container animated fadeInDown">
+            <div class="loginbox bg-white">
+                <div class="loginbox-title">选修成绩查询2.0</div>
+                <div class="loginbox-textbox">
+                    <input value="" class="form-control" placeholder="请输入学号..." id="id" type="text" required="">
+                </div>
+                <div class="loginbox-textbox">
+                    <input class="form-control" placeholder="请输入密码..." id="password" type="password" required="">
+                </div>
+                <div class="loginbox-submit">
+                    <button class="btn btn-primary btn-block" id="submit" onclick="login()">查询</button>
+                </div>
+            </div>
+            <div class="logobox">
+            <div class="text-center"><b>累计查询次数：<text id="count"></text></b></div>
+            <div class="text-center">15级 计科 陈心琴 提供技术支持</div>
+        	</div>
+    </div>
+
+    <!--Basic Scripts-->
+    <script src="public/js/bootstrap.min.js"></script>
+    <!--Beyond Scripts-->
+    <script src="cookie.js"></script>
+    <script type="text/javascript">
+		$.ajax({
+            type: "get",
+            dataType: "jsonp",
+            jsonp: "callback",
+            url: "http://pi.exm233.com:8081/count/getcount.php",
+            async: false,
+            success: function (data) {
+            	var count = data.count;
+            	$("#count").append(count);
+            }
+    	})
+        function login(){
+        	$("#submit").attr("disabled","disabled");
+                $("#submit").text("查询中，请耐心等待...");
+            $.ajax({
+	            type: "get",
+	            dataType: "jsonp",
+	            jsonp: "jsoncallback",
+	            url: "http://125.223.252.16/WCF/Login.svc/JudgeLogin_Student?loginID=" + $("#id").val() + "&&loginPwd=" + $("#password").val(),
+	            async: true,
+	            success: function (data) {
+	                var dataObj = eval("(" + data + ")"); 
+	                if (dataObj.sys_tag != null) {
+	                    if (dataObj.sys_tag == 1) {
+	                        setCookie("AUTH", dataObj.encrypt);
+	                        setCookie("NAME", dataObj.name);
+                                var time = new Date().getTime();
+	                        location.href = "j.html?t="+time;
+	                    }
+	                    else {
+	                        alert(dataObj.sys_message);
+	                        $("#id").val("");
+	                        $("#password").val("");
+	                        $("#submit").removeAttr("disabled","disabled");
+                                $("#submit").text("查询");
+	                    }
+	                }
+	            }
+        	})
+        }
+    </script>
+</body>
+<!--Body Ends-->
+</html>
